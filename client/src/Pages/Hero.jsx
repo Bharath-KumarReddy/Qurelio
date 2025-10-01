@@ -36,7 +36,7 @@ const Hero = (props) => {
       {[...Array(12)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute bottom-0 bg-[#00A0AA] rounded-full opacity-30"
+          className="absolute bottom-0 bg-pink-500 rounded-full opacity-30"
           style={{
             left: `${Math.random() * 100}%`,
             width: `${10 + Math.random() * 20}px`,
@@ -53,7 +53,6 @@ const Hero = (props) => {
         />
       ))}
 
-      {/* Each section wrapped with motion.div for scroll animations */}
       <motion.div
         variants={sectionVariants}
         initial="hidden"

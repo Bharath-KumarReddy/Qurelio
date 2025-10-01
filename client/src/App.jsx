@@ -15,21 +15,16 @@ import AdminAudio from "./Pages/AdminAudio";
 import AdminAudioFilter from "./Pages/AdminAudioFilter";
 import EmergencyRanking from "./Pages/EmergencyRanking";
 
+// 🟢 New Pages
+import AboutPage from "./Pages/About";
+import ContactPage from "./Pages/ConnectWithUs";
+
 import { Route, Routes, useLocation } from "react-router-dom";
-import { useRef } from "react";
 import { ToastContainer } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const HomeSection = useRef(null);
-  const AboutSection = useRef(null);
-  const ServicesPageSection = useRef(null);
-  const WhyChooseUsSection = useRef(null);
-  const CarousalPageSection = useRef(null);
-  const ConnectWithUsSection = useRef(null);
-  const FooterSection = useRef(null);
-
   const jwt = sessionStorage.getItem("jwt");
   const encryptedData = sessionStorage.getItem("encryptedData");
   const location = useLocation();
@@ -43,17 +38,8 @@ function App() {
 
   return (
     <div className="bg-[#fdfdfd] min-h-screen">
-      {/* Navbar stays static */}
-      <Navbar
-        message={"login successful"}
-        AboutSection={AboutSection}
-        HomeSection={HomeSection}
-        ServicesPageSection={ServicesPageSection}
-        WhyChooseUsSection={WhyChooseUsSection}
-        CarousalPageSection={CarousalPageSection}
-        ConnectWithUsSection={ConnectWithUsSection}
-        FooterSection={FooterSection}
-      />
+      {/* Navbar stays fixed */}
+      <Navbar message={"login successful"} />
 
       {/* Toastify Notifications */}
       <ToastContainer
@@ -80,15 +66,33 @@ function App() {
                 exit="exit"
                 transition={{ duration: 0.5, ease: "easeOut" }}
               >
-                <Hero
-                  AboutSection={AboutSection}
-                  HomeSection={HomeSection}
-                  ServicesPageSection={ServicesPageSection}
-                  WhyChooseUsSection={WhyChooseUsSection}
-                  CarousalPageSection={CarousalPageSection}
-                  ConnectWithUsSection={ConnectWithUsSection}
-                  FooterSection={FooterSection}
-                />
+                <Hero />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <AboutPage />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <ContactPage />
               </motion.div>
             }
           />
@@ -177,19 +181,6 @@ function App() {
             />
           )}
           <Route
-            path="*"
-            element={
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <PageNotFound />
-              </motion.div>
-            }
-          />
-          <Route
             path="/admin-dashboard"
             element={
               <motion.div
@@ -251,6 +242,19 @@ function App() {
                 exit="exit"
               >
                 <EmergencyRanking />
+              </motion.div>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <PageNotFound />
               </motion.div>
             }
           />

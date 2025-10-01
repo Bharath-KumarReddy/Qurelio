@@ -4,11 +4,10 @@
   padding: 2rem;
   text-align: center;
   /* background-color: #F8F9FE; */
-  
 }
+
 #doctorCard{
 transition: all 250ms linear;
-
 }
 
 #doctorCard:hover{
