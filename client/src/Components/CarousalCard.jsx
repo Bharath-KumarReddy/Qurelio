@@ -1,35 +1,27 @@
-import CarousalCardStars from './CarousalCardStars';
-import { useEffect, useState } from 'react';
+import { FaStar, FaQuoteLeft } from "react-icons/fa";
 
-const CarousalCard = (props) => {
-    useEffect(() => {
-        const starsArray = Array.from({ length: props.count}, (_, index) => (
-            <CarousalCardStars key={index} />
-        ));
-        setStars(starsArray);
-    }, [props.count]);
+const CarousalCard = ({ count, comment, name }) => {
+  return (
+    <div className="bg-white shadow-lg rounded-xl p-6 h-full flex flex-col justify-between max-w-sm">
+      {/* Quote Icon */}
+      <FaQuoteLeft className="text-[#00A0AA] text-3xl mb-3" />
 
-    const [stars, setStars] = useState([]);
+      {/* Comment */}
+      <p className="text-gray-700 text-base leading-relaxed whitespace-normal break-words">
+        {comment}
+      </p>
 
-    return (
-        <div className='my-[25px]'>
-            <div className='text-start sm:w-[490px]'>
-                <div className='flex '>
-                    <img src="assets/Ellipse 10.svg" alt="" />
-                    <img src="assets/Vector(16).svg" alt="" className='translate-x-[-150%]' />
-                </div>
-                <div className='my-[15px] flex'>
-                    {stars}
-                </div>
-                <h1 className='font-bold text-[32px] mb-[15px]'>
-                    {props.comment}
-                </h1>
-                <p className='font-medium text-[20px]'>
-                    {props.name}
-                </p>
-            </div>
-        </div>
-    );
-}
+      {/* Rating */}
+      <div className="flex mt-4 text-yellow-500">
+        {Array(count).fill().map((_, i) => (
+          <FaStar key={i} />
+        ))}
+      </div>
+
+      {/* Name */}
+      <p className="mt-3 font-semibold text-gray-900">{name}</p>
+    </div>
+  );
+};
 
 export default CarousalCard;
