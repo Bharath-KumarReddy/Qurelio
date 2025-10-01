@@ -43,12 +43,12 @@ const Home = (props) => {
         transition={{ duration: 1, ease: "easeOut" }}
       >
         <motion.div
-          className="bg-gradient-to-tr from-[#FFC567] to-[#FFD98E] rounded-2xl shadow-2xl relative overflow-hidden w-[320px] h-[360px] sm:w-[450px] sm:h-[480px] md:w-[500px] md:h-[500px] flex justify-center items-center"
+          className="rounded-2xl  relative overflow-hidden w-[320px] h-[360px] sm:w-[450px] sm:h-[480px] md:w-[500px] md:h-[500px] flex justify-center items-center"
           whileHover={{ scale: 1.03, rotate: 1 }}
           transition={{ type: "spring", stiffness: 120, damping: 10 }}
         >
           <motion.img
-            src="/assets/image 32.svg"
+            src="/assets/image.png"
             alt="health illustration"
             className="absolute bottom-0 w-[280px] sm:w-[380px] md:w-[420px]"
             initial={{ y: 50, opacity: 0 }}
