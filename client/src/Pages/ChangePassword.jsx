@@ -1,98 +1,134 @@
 import { useState } from "react";
-import { ToastContainer,toast } from 'react-toastify';
-import {useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import { motion } from "framer-motion";
+import "react-toastify/dist/ReactToastify.css";
 
 const ChangePassword = () => {
-    const encryptedData=sessionStorage.getItem('encryptedData');
-    const navigate = useNavigate();
+  const encryptedData = sessionStorage.getItem("encryptedData");
+  const navigate = useNavigate();
 
-    const navigateToLogin = () => {
-         navigate("/login");
-     };
-    const [password, setPassword] = useState("");
-    const [passwordConfirm, setPasswordConfirm] = useState("");
-    const handlePasswordChange = (e) => {
-        setPassword(e.target.value);
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+
+  const navigateToLogin = () => {
+    navigate("/login");
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:3000/${encryptedData}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password,
+          passwordConfirm,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Password successfully changed! Please login.");
+        sessionStorage.removeItem("encryptedData");
+        sessionStorage.removeItem("jwt");
+        setTimeout(() => navigateToLogin(), 1200);
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Password change failed.");
+      }
+    } catch (err) {
+      console.error("Error changing the password:", err.message);
+      toast.error("Something went wrong. Try again.");
     }
-    const handlePasswordConfirmChange = (e) => {
-        setPasswordConfirm(e.target.value);
-    };
-    const handleChangePassword = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:3000/${encryptedData}`, {
-                method: 'PATCH',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
 
-                    "password": password,
-                    "passwordConfirm": passwordConfirm
-                }),
-            })
+    setPassword("");
+    setPasswordConfirm("");
+  };
 
-            if (response.ok) {
-                navigateToLogin();
-                toast.success("password successfully changed!!\n Now login to continue!!");
-                sessionStorage.clear("encryptedData");
-                sessionStorage.clear("jwt");
-                
+  return (
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E6F7F9] via-[#FDFDFD] to-[#EAEAEA] relative overflow-hidden px-6">
+      {/* Animated background blobs (same as login page) */}
+      <motion.div
+        className="absolute top-10 left-10 w-40 h-40 bg-[#00A0AA] rounded-full opacity-20 blur-2xl"
+        animate={{ y: [0, 40, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-10 right-10 w-56 h-56 bg-[#FFC567] rounded-full opacity-20 blur-2xl"
+        animate={{ x: [0, 30, 0] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-            }
-            if (!response.ok) {
-                console.log("The status code :", response.status)
-                console.log("password changing failed");
-                if (response.status === 401) {
-                    console.log("passwords doesn't match")
-                }
-                const errorData = await response.json();
-                throw new Error(errorData.error);
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center z-10 w-full max-w-6xl">
+        {/* Left illustration */}
+        <motion.div
+          initial={{ opacity: 0, x: -80 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="hidden md:flex justify-center"
+        >
+          <motion.img
+            src="assets/authentication-two-color-b35f8.svg"
+            alt="Change Password Illustration"
+            className="h-[400px] drop-shadow-2xl"
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
 
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, x: 80 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+          className="backdrop-blur-lg bg-white/70 shadow-2xl rounded-2xl p-10 w-full max-w-md border border-white/30"
+        >
+          <h1 className="text-[32px] font-extrabold text-[#111] mb-6 text-center">
+            Change Password 🔒
+          </h1>
 
-            }
+          <form onSubmit={handleChangePassword} className="flex flex-col gap-5">
+            <input
+              type="password"
+              placeholder="New Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full h-[50px] rounded-xl px-4 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00A0AA] transition-all"
+            />
+            <input
+              type="password"
+              placeholder="Confirm New Password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              required
+              className="w-full h-[50px] rounded-xl px-4 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00A0AA] transition-all"
+            />
 
-        } catch (err) {
-            console.error(`Error changing the password`, err.message);
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="submit"
+              className="w-full h-[50px] bg-[#00A0AA] text-white font-bold rounded-xl shadow-lg hover:bg-[#00838a] transition-all"
+            >
+              Update Password
+            </motion.button>
+          </form>
 
-        }
+          <div className="mt-5 text-center">
+            <p>
+              Don’t want to change?{" "}
+              <Link to="/" className="text-[#00A0AA] hover:underline font-semibold">
+                Go Home
+              </Link>
+            </p>
+          </div>
+        </motion.div>
+      </div>
 
-        setPassword("");
-        setPasswordConfirm("");
-    }
-    return (
-        <section className="flex justify-between my-[100px] py-[100px]">
-            <div>
-                <img src="assets/authentication-two-color-b35f8.svg" className="h-[400px] " alt="" />
-            </div>
-
-            <div className=" w-[475px] shadow-lg px-[35px] py-[20px] rounded-lg flex flex-col">
-                <h1 className='text-[40px] font-bold mb-[30px]'>Change password</h1>
-
-
-                <input
-                    type="password"
-                    placeholder="New Password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    className="w-[400px] h-[50px] rounded-xl my-[10px] border-[1px] border-[#979797] p-[10px]" />
-
-                <input
-                    type="password"
-                    placeholder="Confirm New Password"
-                    value={passwordConfirm}
-                    onChange={handlePasswordConfirmChange}
-                    className="w-[400px] h-[50px] rounded-xl my-[10px] border-[1px] border-[#979797] p-[10px]" />
-
-                <button
-                    className="w-[400px] h-[50px] bg-[#18A0A9] text-[#FFFFFF] font-medium rounded-xl my-[10px] "
-                    onClick={handleChangePassword}
-                >Change Password</button>
-                <div className='mt-[10px]'>Don't want to change password? <a href="#" className='text-[#3b82f6] hover:underline'>Go to Home</a></div>
-            </div>
-
-        </section>
-    );
-}
+      <ToastContainer position="top-right" theme="colored" />
+    </section>
+  );
+};
 
 export default ChangePassword;
