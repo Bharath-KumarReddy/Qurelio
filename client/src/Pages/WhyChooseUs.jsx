@@ -39,7 +39,7 @@ const WhyChooseUs = (props) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 lg:flex lg:justify-between w-full sm:px-[75px] ">
 
                     <div className="inline-block translate-y-[-128px]">
-                        <img src="assets/image 36.svg" alt="" className="z-30 translate-y-[128px] sm:ml-[82px] relative" />
+                        <img src="assets/image1.png" alt="" className="z-30 translate-y-[128px] sm:ml-[82px] relative" />
                         <div className="bg-[#FFC567] w-[250px] sm:w-[385px] h-[128px] rounded-xl "> </div>
                     </div>
 
