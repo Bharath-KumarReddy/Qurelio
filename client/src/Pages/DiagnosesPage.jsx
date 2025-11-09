@@ -87,6 +87,29 @@ const DropdownForm = () => {
     });
 
     // --------------------
+    // Form Validation Functions
+    // --------------------
+    const isDiabetesFormValid = () => {
+        return Object.values(diabetesFormData).every(value => value.trim() !== '');
+    };
+
+    const isThyroidFormValid = () => {
+        return Object.values(thyroidFormData).every(value => value.trim() !== '');
+    };
+
+    const isBreastCancerFormValid = () => {
+        return Object.values(breastCancerFormData).every(value => value.trim() !== '');
+    };
+
+    const isCovidFormValid = () => {
+        return covidImage !== '';
+    };
+
+    const isPneumoniaFormValid = () => {
+        return pneumoniaImage !== '';
+    };
+
+    // --------------------
     // Input Handlers
     // --------------------
     const handleDropdownChange = (event) => {
@@ -120,6 +143,38 @@ const DropdownForm = () => {
     };
 
     // --------------------
+    // Clear Form Handler
+    // --------------------
+    const handleClearForm = () => {
+        // Clear all form data
+        setDiabetesFormData({
+            pregnancies: '', glucose: '', bloodPressure: '', skinThickness: '',
+            insulin: '', bmi: '', diabetesPedigreeFunction: '', age: ''
+        });
+        setThyroidFormData({
+            age: '', on_thyroxine: '', query_on_thyroxine: '', on_antithyroid_medication: '',
+            pregnant: '', thyroid_surgery: '', tumor: '', T3: '', TT4: '', T4U: '', FTI: ''
+        });
+        setBreastCancerFormData({
+            radius_mean: '', texture_mean: '', perimeter_mean: '', area_mean: '',
+            smoothness_mean: '', compactness_mean: '', concavity_mean: '', concave_points_mean: '',
+            radius_worst: '', texture_worst: '', perimeter_worst: '', area_worst: '',
+            smoothness_worst: '', compactness_worst: '', concavity_worst: '', concave_points_worst: '',
+            symmetry_worst: '', fractal_dimension_worst: ''
+        });
+        setPneumoniaImage('');
+        setCovidImage('');
+        
+        // Clear results
+        setProb('');
+        setVisibility("hidden text-2xl font-bold");
+        
+        // Reset file inputs
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => input.value = '');
+    };
+
+    // --------------------
     // Form Submit Handlers
     // --------------------
     const handleDiabetesFormChange = async (e) => {
@@ -146,10 +201,7 @@ const DropdownForm = () => {
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     const probability = getValueBetweenZeroAndOne(data.probability);
                     setProb(probability);
-                    setDiabetesFormData({
-                        pregnancies: '', glucose: '', bloodPressure: '', skinThickness: '',
-                        insulin: '', bmi: '', diabetesPedigreeFunction: '', age: ''
-                    });
+                    // Keep form data - don't clear inputs
                 }
             } catch (err) {
                 console.error(`Error diagnosing the user`, err.message);
@@ -187,10 +239,7 @@ const DropdownForm = () => {
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     const probability = getValueBetweenZeroAndOne(data.probability);
                     setProb(probability);
-                    setThyroidFormData({
-                        age: '', on_thyroxine: '', query_on_thyroxine: '', on_antithyroid_medication: '',
-                        pregnant: '', thyroid_surgery: '', tumor: '', T3: '', TT4: '', T4U: '', FTI: '',
-                    });
+                    // Keep form data - don't clear inputs
                 }
             } catch (err) {
                 console.error(`Error diagnosing the user`, err.message);
@@ -217,7 +266,7 @@ const DropdownForm = () => {
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     const probability = getValueBetweenZeroAndOne(data.probability);
                     setProb(probability);
-                    setPneumoniaImage('');
+                    // Keep form data - don't clear inputs
                 }
             } catch (err) {
                 console.error(`Error diagnosing the user`, err.message);
@@ -243,7 +292,7 @@ const DropdownForm = () => {
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     const probability = getValueBetweenZeroAndOne(data.probability);
                     setProb(probability);
-                    setCovidImage('');
+                    // Keep form data - don't clear inputs
                 }
             } catch (err) {
                 console.error(`Error diagnosing the user`, err.message);
@@ -273,7 +322,7 @@ const DropdownForm = () => {
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     const probability = getValueBetweenZeroAndOne(data.probability);
                     setProb(probability);
-                    setBreastCancerFormData(Object.fromEntries(Object.keys(breastCancerFormData).map(k => [k, ''])));
+                    // Keep form data - don't clear inputs
                 }
             } catch (err) {
                 console.error(`Error diagnosing the user`, err.message);
@@ -289,7 +338,7 @@ const DropdownForm = () => {
     // --------------------
     const renderForm = () => {
         const sharedInput = "w-full m-2 h-[50px] rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-cyan-500 outline-none shadow-sm";
-        const sharedButton = "mx-auto w-[180px] h-[45px] bg-cyan-600 hover:bg-cyan-700 transition text-white font-medium rounded-xl my-4 shadow-md";
+        const sharedButton = "mx-auto w-[180px] h-[45px] bg-cyan-600 hover:bg-cyan-700 transition text-white font-medium rounded-xl my-4 shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed";
 
         switch (selectedOption) {
             case 'Covid 19':
@@ -297,7 +346,17 @@ const DropdownForm = () => {
                     <div className="space-y-4">
                         <form className="flex flex-col items-center">
                             <input type="file" className={sharedInput} onChange={handleCovidInputChange} />
-                            <button type="submit" className={sharedButton} onClick={handleCovidFormChange}>Diagnose Me</button>
+                            <div className="flex gap-4">
+                                <button 
+                                    type="submit" 
+                                    className={sharedButton} 
+                                    onClick={handleCovidFormChange}
+                                    disabled={!isCovidFormValid()}
+                                >
+                                    Diagnose Me
+                                </button>
+                                <button type="button" className="mx-auto w-[180px] h-[45px] bg-red-600 hover:bg-red-700 transition text-white font-medium rounded-xl my-4 shadow-md" onClick={handleClearForm}>Clear Form</button>
+                            </div>
                         </form>
                         <h3 className={visibility}>Probability of Covid-19: <span className={probColour}>{prob}</span></h3>
                     </div>
@@ -317,8 +376,16 @@ const DropdownForm = () => {
                                     className={sharedInput}
                                 />
                             ))}
-                            <div className="col-span-full flex justify-center">
-                                <button type="submit" className={sharedButton} onClick={handleBreastCancerFormChange}>Diagnose Me</button>
+                            <div className="col-span-full flex justify-center gap-4">
+                                <button 
+                                    type="submit" 
+                                    className={sharedButton} 
+                                    onClick={handleBreastCancerFormChange}
+                                    disabled={!isBreastCancerFormValid()}
+                                >
+                                    Diagnose Me
+                                </button>
+                                <button type="button" className="mx-auto w-[180px] h-[45px] bg-red-600 hover:bg-red-700 transition text-white font-medium rounded-xl my-4 shadow-md" onClick={handleClearForm}>Clear Form</button>
                             </div>
                         </form>
                         <h3 className={visibility}>Probability of Breast Cancer: <span className={probColour}>{prob}</span></h3>
@@ -339,8 +406,16 @@ const DropdownForm = () => {
                                     className={sharedInput}
                                 />
                             ))}
-                            <div className="col-span-full flex justify-center">
-                                <button type="submit" className={sharedButton} onClick={handleThyroidFormChange}>Diagnose Me</button>
+                            <div className="col-span-full flex justify-center gap-4">
+                                <button 
+                                    type="submit" 
+                                    className={sharedButton} 
+                                    onClick={handleThyroidFormChange}
+                                    disabled={!isThyroidFormValid()}
+                                >
+                                    Diagnose Me
+                                </button>
+                                <button type="button" className="mx-auto w-[180px] h-[45px] bg-red-600 hover:bg-red-700 transition text-white font-medium rounded-xl my-4 shadow-md" onClick={handleClearForm}>Clear Form</button>
                             </div>
                         </form>
                         <h3 className={visibility}>Probability of Thyroid: <span className={probColour}>{prob}</span></h3>
@@ -352,7 +427,17 @@ const DropdownForm = () => {
                     <div className="space-y-4">
                         <form className="flex flex-col items-center">
                             <input type="file" className={sharedInput} onChange={handlePneumoniaInputChange} />
-                            <button type="submit" className={sharedButton} onClick={handlePneumoniaFormChange}>Diagnose Me</button>
+                            <div className="flex gap-4">
+                                <button 
+                                    type="submit" 
+                                    className={sharedButton} 
+                                    onClick={handlePneumoniaFormChange}
+                                    disabled={!isPneumoniaFormValid()}
+                                >
+                                    Diagnose Me
+                                </button>
+                                <button type="button" className="mx-auto w-[180px] h-[45px] bg-red-600 hover:bg-red-700 transition text-white font-medium rounded-xl my-4 shadow-md" onClick={handleClearForm}>Clear Form</button>
+                            </div>
                         </form>
                         <h3 className={visibility}>Probability of Pneumonia: <span className={probColour}>{prob}</span></h3>
                     </div>
@@ -372,8 +457,16 @@ const DropdownForm = () => {
                                     className={sharedInput}
                                 />
                             ))}
-                            <div className="col-span-full flex justify-center">
-                                <button type="submit" className={sharedButton} onClick={handleDiabetesFormChange}>Diagnose Me</button>
+                            <div className="col-span-full flex justify-center gap-4">
+                                <button 
+                                    type="submit" 
+                                    className={sharedButton} 
+                                    onClick={handleDiabetesFormChange}
+                                    disabled={!isDiabetesFormValid()}
+                                >
+                                    Diagnose Me
+                                </button>
+                                <button type="button" className="mx-auto w-[180px] h-[45px] bg-red-600 hover:bg-red-700 transition text-white font-medium rounded-xl my-4 shadow-md" onClick={handleClearForm}>Clear Form</button>
                             </div>
                         </form>
                         <h3 className={visibility}>Probability of Diabetes: <span className={probColour}>{prob}</span></h3>

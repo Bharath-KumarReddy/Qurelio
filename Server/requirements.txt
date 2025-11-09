@@ -1,5 +1,8 @@
-flask
-numpy
-opencv-python
-joblib
-tensorflow
+Flask==3.0.0
+Flask-CORS==4.0.0
+tensorflow==2.20.0
+scikit-learn==1.6.1
+numpy==2.2.1
+opencv-python==4.11.0.86
+Pillow==12.0.0
+werkzeug==3.0.1

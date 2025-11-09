@@ -62,7 +62,7 @@ def diagnose_Thyroid():
 @app.route('/diagnose_Breast_Cancer', methods=['POST'])
 def diagnose_Breast_Cancer():
     try:
-        Breast_Cancer_model = pickle.load(open('Ml Models/Breast_Cancer_Model.pkl', 'rb'))
+        Breast_Cancer_model = pickle.load(open('./Ml Models/Breast_Cancer_Model.pkl', 'rb'))
         data = request.get_json()
         int_features = [value for value in data.values()]
         final = [np.array(int_features)]
