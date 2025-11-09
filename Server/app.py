@@ -13,16 +13,20 @@ CORS(app, supports_credentials=True)
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    response.headers.add('Access-Control-Allow-Methods', 'POST')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
-# Handle preflight requests
+# Handle preflight requests for all endpoints
 @app.route('/diagnose_Diabetes', methods=['OPTIONS'])
+@app.route('/diagnose_Thyroid', methods=['OPTIONS'])
+@app.route('/diagnose_Breast_Cancer', methods=['OPTIONS'])
+@app.route('/diagnose_Pneumonia', methods=['OPTIONS'])
+@app.route('/diagnose_Covid', methods=['OPTIONS'])
 def options():
     response = jsonify({'message': 'CORS preflight request successful'})
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    response.headers.add('Access-Control-Allow-Methods', 'POST')
+    response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
     return response
 
 
