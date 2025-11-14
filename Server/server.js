@@ -9,6 +9,9 @@ const AudioUpload = require('./Models/AudioUpload');
 const fs = require('fs');
 require('dotenv').config({ path: './config.env' });
 
+// Import AI-based urgency analyzer
+const { analyzeUrgencyWithAI, fallbackAnalysis } = require('./AI_Urgency/urgencyAnalyzer');
+
 const app = express();
 const PORT = 3000;
 const DB = process.env.DATABASE;
@@ -29,6 +32,16 @@ mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true })
   const storage = multer.memoryStorage();
   const upload = multer({ storage });
   
+  // ============================================================
+  // CONFIGURATION TOGGLES
+  // ============================================================
+  // Toggle between AI and hardcoded analysis
+  const USE_AI_ANALYSIS = true; // Set to false to use hardcoded keyword matching
+  
+  // ============================================================
+  // OLD HARDCODED SENTIMENT ANALYSIS (COMMENTED - KEPT AS BACKUP)
+  // ============================================================
+  /*
   // Simple sentiment analysis function for emergency detection
   function analyzeEmergencySentiment(text) {
     const lowerText = text.toLowerCase();
@@ -85,6 +98,10 @@ mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true })
       detectedKeywords: Object.keys(emergencyKeywords).filter(keyword => lowerText.includes(keyword))
     };
   }
+  */
+  // ============================================================
+  // END OF OLD HARDCODED ANALYSIS
+  // ============================================================
   
   // Upload audio endpoint
   app.post('/upload-audio', upload.single('audio'), async (req, res) => {
@@ -92,6 +109,17 @@ mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true })
       if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
   
       const { name, email, transcript } = req.body; // transcript will come from frontend
+      
+      // Debug logging
+      console.log('========================================');
+      console.log('📤 AUDIO UPLOAD REQUEST RECEIVED');
+      console.log('Name:', name);
+      console.log('Email:', email);
+      console.log('Transcript:', transcript);
+      console.log('Transcript length:', transcript ? transcript.length : 0);
+      console.log('File size:', req.file.size, 'bytes');
+      console.log('========================================');
+      
       if (!name || !email) return res.status(400).json({ message: 'Name and Email required' });
   
       const filename = `audio_${Date.now()}.webm`;
@@ -114,32 +142,71 @@ mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true })
         .on('finish', async () => {
           console.log(`Saved audio to GridFS with ID: ${uploadStream.id}`);
           
-          // Analyze sentiment/emergency from transcript
-          let sentimentAnalysis = { urgencyScore: 0, urgencyRank: 3, keywordCount: 0, detectedKeywords: [] };
+          // ============================================================
+          // NEW AI-BASED URGENCY ANALYSIS
+          // ============================================================
+          let analysisResult;
           
           if (transcript) {
-            sentimentAnalysis = analyzeEmergencySentiment(transcript);
+            if (USE_AI_ANALYSIS) {
+              console.log('🤖 Using AI-based urgency analysis...');
+              try {
+                // Use AI-based analysis
+                analysisResult = await analyzeUrgencyWithAI(transcript);
+                console.log('✅ AI Analysis Result:', analysisResult);
+              } catch (error) {
+                console.error('❌ AI analysis failed, using fallback:', error);
+                analysisResult = fallbackAnalysis(transcript);
+              }
+            } else {
+              console.log('📝 Using hardcoded keyword matching (fallback mode)');
+              analysisResult = fallbackAnalysis(transcript);
+            }
+            
             console.log('Transcript:', transcript);
-            console.log('Emergency Analysis:', sentimentAnalysis);
+            console.log('Urgency Analysis:', analysisResult);
+          } else {
+            // No transcript provided
+            analysisResult = {
+              urgencyScore: 0,
+              urgencyRank: 3,
+              severity: 'none',
+              detectedSymptoms: [],
+              detectedKeywords: [],
+              recommendation: 'No transcript provided',
+              confidence: 0
+            };
           }
           
-          // Save to AudioUpload collection
+          // Save to AudioUpload collection with enhanced data
           await AudioUpload.create({
             name,
             email,
             fileId: uploadStream.id,
             transcript: transcript || '',
-            sentimentScore: sentimentAnalysis.urgencyScore,
-            urgencyRank: sentimentAnalysis.urgencyRank
+            sentimentScore: analysisResult.urgencyScore,
+            urgencyRank: analysisResult.urgencyRank,
+            aiAnalysis: {
+              severity: analysisResult.severity,
+              detectedSymptoms: analysisResult.detectedSymptoms,
+              recommendation: analysisResult.recommendation,
+              confidence: analysisResult.confidence,
+              aiClassification: analysisResult.aiClassification || 'N/A'
+            }
           });
           
           return res.status(200).json({
             message: 'Audio uploaded and analyzed successfully',
             fileId: uploadStream.id.toString(),
             transcript: transcript || '',
-            urgencyScore: sentimentAnalysis.urgencyScore,
-            urgencyRank: sentimentAnalysis.urgencyRank,
-            detectedKeywords: sentimentAnalysis.detectedKeywords
+            urgencyScore: analysisResult.urgencyScore,
+            urgencyRank: analysisResult.urgencyRank,
+            severity: analysisResult.severity,
+            detectedSymptoms: analysisResult.detectedSymptoms,
+            detectedKeywords: analysisResult.detectedKeywords || [],
+            recommendation: analysisResult.recommendation,
+            confidence: analysisResult.confidence,
+            analysisMethod: USE_AI_ANALYSIS ? 'AI-based' : 'Keyword-based'
           });
         });
   
@@ -149,26 +216,31 @@ mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true })
     }
   });
   
- // List all audios with metadata - adjusted
+ // List all audios with metadata
+ // Fetches from AudioUpload collection (has full AI analysis data)
  app.get('/audios', async (req, res) => {
   console.log('Received request to /audios');
 
   try {
-    const filesCol = mongoose.connection.db.collection('audioFiles.files');
-    const files = await filesCol.find({}).toArray();
-    console.log('Files retrieved:', files.length);
+    // Fetch ALL audio records, sorted by most recent first
+    const audioRecords = await AudioUpload.find({}).sort({ createdAt: -1 });
+    console.log(`📊 Found ${audioRecords.length} audio records`);
 
-    if (!files || files.length === 0) {
-      return res.status(404).json({ message: 'No audios found' });
+    if (!audioRecords || audioRecords.length === 0) {
+      return res.status(200).json([]); // Return empty array instead of 404
     }
 
-    const audios = files.map(file => ({
-      id: file._id.toString(),
-      filename: file.filename,
-      name: file.metadata?.name || 'Unknown',
-      email: file.metadata?.email || 'Unknown',
-      uploadDate: file.uploadDate,
-      contentType: file.contentType
+    // Map to include all necessary data
+    const audios = audioRecords.map(record => ({
+      id: record.fileId.toString(),
+      fileId: record.fileId.toString(),
+      name: record.name,
+      email: record.email,
+      transcript: record.transcript,
+      sentimentScore: record.sentimentScore,
+      urgencyRank: record.urgencyRank,
+      uploadDate: record.createdAt,
+      aiAnalysis: record.aiAnalysis
     }));
 
     return res.status(200).json(audios);
@@ -256,12 +328,28 @@ app.get('/audio/:id', async (req, res) => {
 
 app.use('/', userRoutes);
 
-// Endpoint to get audios/users ranked by urgency
+// Endpoint to get current server configuration
+app.get('/api/config', (req, res) => {
+  res.json({
+    useAiAnalysis: USE_AI_ANALYSIS,
+    useNewDataMode: USE_NEW_DATA_MODE,
+    newDataStartDate: NEW_DATA_START_DATE,
+    message: USE_NEW_DATA_MODE 
+      ? '📊 Using NEW data mode - Real voice recordings from today onwards' 
+      : '📦 Using OLD data mode - Backup test recordings'
+  });
+});
+
+// Endpoint to get audios/users ranked by urgency (most urgent first, then by score, then by time)
 app.get('/emergency-ranking', async (req, res) => {
   try {
-    const ranked = await AudioUpload.find({}).sort({ urgencyRank: 1, createdAt: 1 });
+    // Fetch ALL audio records, sorted by urgency rank (1=HIGH first), then score, then most recent
+    const ranked = await AudioUpload.find({}).sort({ urgencyRank: 1, sentimentScore: -1, createdAt: -1 });
+    
+    console.log(`📊 Found ${ranked.length} audio records for emergency ranking`);
     res.status(200).json(ranked);
   } catch (err) {
+    console.error('Error fetching emergency ranking:', err);
     res.status(500).json({ message: 'Error fetching emergency ranking' });
   }
 });

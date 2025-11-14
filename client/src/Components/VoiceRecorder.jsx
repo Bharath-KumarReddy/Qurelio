@@ -9,17 +9,25 @@ const VoiceRecorder = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const mediaRecorderRef = useRef(null);
   const recognitionRef = useRef(null);
+  const transcriptRef = useRef(""); // Add ref to store transcript
   const [audioId, setAudioId] = useState(null);
 
   const startRecording = async () => {
     const token = sessionStorage.getItem("jwt");
-    const name = sessionStorage.getItem("name");
+    let name = sessionStorage.getItem("name");
     const email = sessionStorage.getItem("email");
+    
+    // Handle undefined, null, or string "undefined"
+    if (!name || name === "undefined" || name === "null") {
+      name = email || "Anonymous";
+    }
 
     if (!token) {
       toast.error("Please login first to record audio!");
       return;
     }
+    
+    console.log("🎤 Recording with name:", name, "email:", email);
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -27,6 +35,7 @@ const VoiceRecorder = () => {
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
       setTranscript("");
+      transcriptRef.current = ""; // Reset ref too
 
       // Initialize Web Speech API for transcription
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -54,7 +63,9 @@ const VoiceRecorder = () => {
             }
           }
 
-          setTranscript(finalTranscript + interimTranscript);
+          const fullTranscript = finalTranscript + interimTranscript;
+          setTranscript(fullTranscript);
+          transcriptRef.current = fullTranscript; // Update ref too
         };
 
         recognition.onerror = (event) => {
@@ -83,7 +94,9 @@ const VoiceRecorder = () => {
         formData.append("audio", audioBlob);
         formData.append("name", name);
         formData.append("email", email);
-        formData.append("transcript", transcript);
+        formData.append("transcript", transcriptRef.current); // Use ref instead of state
+
+        console.log("📤 Uploading with transcript:", transcriptRef.current); // Debug log
 
         // Stop speech recognition
         if (recognitionRef.current) {

@@ -3,12 +3,31 @@ import { Link, useNavigate } from "react-router-dom";
 const Navbar = () => {
   const navigate = useNavigate();
   const jwt = sessionStorage.getItem("jwt");
+  const email = sessionStorage.getItem("email");
+
+  // Check if user is admin
+  const isAdmin = () => {
+    if (!email) return false;
+    const adminEmails = ["kbr1@gmail.com", "lk5@gmail.com", "kiran@gmail.com"];
+    return adminEmails.includes(email.toLowerCase());
+  };
+
+  // Navigate to appropriate home
+  const handleHomeClick = () => {
+    if (isAdmin()) {
+      navigate("/admin-dashboard");
+    } else {
+      navigate("/");
+    }
+  };
 
   // Logout
   const handleLogout = () => {
     sessionStorage.removeItem("jwt");
     sessionStorage.removeItem("iv");
     sessionStorage.removeItem("encryptedData");
+    sessionStorage.removeItem("email");
+    sessionStorage.removeItem("name");
     navigate("/login");
   };
 
@@ -26,10 +45,10 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-gray-200 shadow-sm">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto px-6 py-3">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <button onClick={handleHomeClick} className="flex items-center gap-2 cursor-pointer">
           <img src="/assets/healthcare 1.svg" alt="logo" className="w-8 h-8" />
           <span className="font-bold text-2xl text-gray-800">Qurelio</span>
-        </Link>
+        </button>
 
         {/* Mobile Menu Button */}
         <button
@@ -52,7 +71,7 @@ const Navbar = () => {
         <div className="hidden w-full lg:block md:w-auto" id="navbar-default">
           <ul className="flex flex-col md:flex-row md:space-x-8 mt-4 md:mt-0 items-center">
             <li>
-              <Link to="/" className={navLink}>Home</Link>
+              <button onClick={handleHomeClick} className={navLink}>Home</button>
             </li>
             <li>
               <Link to="/about" className={navLink}>About</Link>

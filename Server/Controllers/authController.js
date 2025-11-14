@@ -39,7 +39,8 @@ exports.signup=catchAsync(async(req,res,next)=>{
             user:newUser,
             "encryptedData":  encryptedData
         },
-        email
+        email,
+        name  // Add name to response
     })
 })
 
