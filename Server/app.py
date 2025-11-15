@@ -82,7 +82,14 @@ def diagnose_Pneumonia():
     try:
         if 'image' not in request.files:
             return jsonify({'error': 'No file part'})
-        pneumonia_model=pickle.load(open('./Ml Models/pneumonia_model.pkl', 'rb'))    
+        
+        # Load Keras model (.h5 format - converted from old .pkl)
+        try:
+            pneumonia_model = tf.keras.models.load_model('./Ml Models/pneumonia_model.h5', compile=False)
+        except Exception as load_error:
+            print(f"Model load failed: {load_error}")
+            return jsonify({'error': f'Failed to load model: {str(load_error)}'})
+            
         image = request.files['image'].read()
         nparr = np.frombuffer(image, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -93,6 +100,9 @@ def diagnose_Pneumonia():
         # print(output)
         return jsonify({'status':'success','probability': output})
     except Exception as e:
+        print(f"Error in Pneumonia diagnosis: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)})
     
 
