@@ -350,11 +350,22 @@ const AdminAudioFilter = () => {
       {expandedRow && audios.find(a => a._id === expandedRow) && (
         <motion.div
           ref={detailsRef}
-          className="mt-6 bg-white rounded-xl shadow-xl p-6 border-2 border-purple-300"
+          className="mt-6 bg-white rounded-xl shadow-xl p-6 border-2 border-purple-300 relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Close Button */}
+          <button
+            onClick={() => setExpandedRow(null)}
+            className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl"
+            title="Close Details"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           {(() => {
             const audio = audios.find(a => a._id === expandedRow);
             const aiAnalysis = audio.aiAnalysis || {};
@@ -463,13 +474,6 @@ const AdminAudioFilter = () => {
                       {aiAnalysis.recommendation || "No recommendation available"}
                     </p>
                   </div>
-                  
-                  <button
-                    onClick={() => setExpandedRow(null)}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-                  >
-                    Close Details
-                  </button>
                 </div>
               </div>
             );
