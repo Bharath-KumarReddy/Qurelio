@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 
@@ -6,6 +6,7 @@ const AdminAudioFilter = () => {
   const [audios, setAudios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRow, setExpandedRow] = useState(null); // Track which row is expanded
+  const detailsRef = useRef(null); // Reference to the details section
 
   useEffect(() => {
     const fetchAudios = async () => {
@@ -34,6 +35,18 @@ const AdminAudioFilter = () => {
 
     return () => channel.close();
   }, []);
+
+  // Auto-scroll to details when expanded
+  useEffect(() => {
+    if (expandedRow && detailsRef.current) {
+      setTimeout(() => {
+        detailsRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest' 
+        });
+      }, 100);
+    }
+  }, [expandedRow]);
 
   const getUrgencyColor = (urgencyRank) => {
     switch (urgencyRank) {
@@ -315,14 +328,14 @@ const AdminAudioFilter = () => {
                     </td>
                     
                     <td className="py-4 px-4">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 items-center">
                         <button
                           onClick={() => setExpandedRow(isExpanded ? null : audio._id)}
                           className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1 rounded transition"
                         >
                           {isExpanded ? '▲ Hide Details' : '▼ View Details'}
                         </button>
-                        <audio controls src={audioUrl} className="w-full h-8" />
+                        <audio controls src={audioUrl} className="w-48 h-10" />
                       </div>
                     </td>
                   </motion.tr>
@@ -336,6 +349,7 @@ const AdminAudioFilter = () => {
       {/* Expanded Details Section */}
       {expandedRow && audios.find(a => a._id === expandedRow) && (
         <motion.div
+          ref={detailsRef}
           className="mt-6 bg-white rounded-xl shadow-xl p-6 border-2 border-purple-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

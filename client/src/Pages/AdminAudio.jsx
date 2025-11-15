@@ -137,7 +137,7 @@ const AdminAudio = () =>{
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <audio controls src={audioUrl} className="w-full" />
+                      <audio controls src={audioUrl} className="w-64 h-10" />
                     </td>
                   </motion.tr>
                 );
