@@ -11,14 +11,10 @@ const DropdownForm = () => {
     const navigateToLogin = () => navigate('/login');
 
     const getValueBetweenZeroAndOne = (input) => {
-        if (input === 0 || input === 1) return Math.random();
-        const str = JSON.stringify(input);
-        let hs = 0;
-        for (let i = 0; i < str.length; i++) {
-            hs = (hs << 5) - hs + str.charCodeAt(i);
-            hs = hs & hs;
-        }
-        return Math.abs(hs) / 0x7FFFFFFF;
+        // Simply parse the number from Flask (already between 0 and 1)
+        const value = parseFloat(input);
+        // Ensure it's between 0 and 1
+        return Math.max(0, Math.min(1, value));
     };
 
     const [prob, setProb] = useState("");
@@ -243,7 +239,7 @@ const DropdownForm = () => {
             setLoading(true);
             setVisibility("hidden text-2xl font-bold");
             try {
-                const response = await fetch(`http://127.0.0.1:5000/diagnose_Thyroid`, {
+                const response = await fetch(`http://127.0.0.1:5000/diagnose_Diabetes`, {
                     method: 'POST',
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -270,7 +266,6 @@ const DropdownForm = () => {
                     setProb(probability);
                 }
             } catch (err) {
-                console.error(`Error diagnosing the user`, err.message);
                 setLoading(false);
             }
         } else {
@@ -287,11 +282,11 @@ const DropdownForm = () => {
             
             const requestBody = {
                 "age": parseFloat(thyroidFormData.age),
-                "on thyroxine": parseFloat(thyroidFormData.on_thyroxine),
-                "query on thyroxine": parseFloat(thyroidFormData.query_on_thyroxine),
-                "on antithyroid medication": parseFloat(thyroidFormData.on_antithyroid_medication),
+                "on_thyroxine": parseFloat(thyroidFormData.on_thyroxine),
+                "query_on_thyroxine": parseFloat(thyroidFormData.query_on_thyroxine),
+                "on_antithyroid_medication": parseFloat(thyroidFormData.on_antithyroid_medication),
                 "pregnant": parseFloat(thyroidFormData.pregnant),
-                "thyroid surgery": parseFloat(thyroidFormData.thyroid_surgery),
+                "thyroid_surgery": parseFloat(thyroidFormData.thyroid_surgery),
                 "tumor": parseFloat(thyroidFormData.tumor),
                 "T3": parseFloat(thyroidFormData.T3),
                 "TT4": parseFloat(thyroidFormData.TT4),
@@ -300,7 +295,7 @@ const DropdownForm = () => {
             };
             
             try {
-                const response = await fetch(` http://127.0.0.1:5000/diagnose_Thyroid`, {
+                const response = await fetch(`http://127.0.0.1:5000/diagnose_Thyroid`, {
                     method: 'POST',
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -320,7 +315,6 @@ const DropdownForm = () => {
                     setProb(probability);
                 }
             } catch (err) {
-                console.error(`Error diagnosing the user`, err.message);
                 setLoading(false);
             }
         } else {
@@ -332,36 +326,26 @@ const DropdownForm = () => {
     const handlePneumoniaFormChange = async (e) => {
         if (jwt) {
             e.preventDefault();
-            console.log("🔬 Pneumonia Diagnosis Started");
-            console.log("📁 Image file:", pneumoniaImage);
-            
             setLoading(true);
             setVisibility("hidden text-2xl font-bold");
             try {
                 const formData = new FormData();
                 formData.append('image', pneumoniaImage);
                 
-                console.log("📤 Sending request to Flask server...");
-                const response = await fetch(' http://127.0.0.1:5000/diagnose_Pneumonia', {
+                const response = await fetch('http://127.0.0.1:5000/diagnose_Pneumonia', {
                     method: 'POST',
                     body: formData,
                     credentials: 'include',
                 });
                 
-                console.log("📥 Response status:", response.status);
-                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error("❌ Server error response:", errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log("✅ Pneumonia API Response:", data);
                 
                 if (data.status === 'success') {
                     const probability = getValueBetweenZeroAndOne(data.probability);
-                    console.log("📊 Calculated probability:", probability);
                     
                     // Minimum loading time to ensure loader is visible
                     await new Promise(resolve => setTimeout(resolve, 800));
@@ -369,15 +353,11 @@ const DropdownForm = () => {
                     setLoading(false);
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     setProb(probability);
-                    console.log("🎉 Pneumonia diagnosis complete!");
                 } else {
-                    console.error("⚠️ API returned non-success status:", data);
                     setLoading(false);
                     toast.error("Failed to diagnose. Please try again.");
                 }
             } catch (err) {
-                console.error(`❌ Error diagnosing pneumonia:`, err.message);
-                console.error("❌ Full error:", err);
                 setLoading(false);
                 toast.error("Error processing your request. Please check your image and try again.");
             }
@@ -405,7 +385,6 @@ const DropdownForm = () => {
                 }
                 
                 const data = await response.json();
-                console.log("COVID API Response:", data);
                 
                 if (data.status === 'success') {
                     const probability = getValueBetweenZeroAndOne(data.probability);
@@ -417,13 +396,10 @@ const DropdownForm = () => {
                     setVisibility("flex text-2xl font-bold justify-center mt-4");
                     setProb(probability);
                 } else {
-                    console.error("API returned non-success status:", data);
                     setLoading(false);
                     toast.error("Failed to diagnose. Please try again.");
                 }
             } catch (err) {
-                console.error(`Error diagnosing COVID:`, err.message);
-                console.error("Full error:", err);
                 setLoading(false);
                 toast.error("Error processing your request. Please check your image and try again.");
             }
@@ -461,7 +437,6 @@ const DropdownForm = () => {
                     setProb(probability);
                 }
             } catch (err) {
-                console.error(`Error diagnosing the user`, err.message);
                 setLoading(false);
             }
         } else {

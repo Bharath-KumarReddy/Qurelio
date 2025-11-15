@@ -37,7 +37,17 @@ def diagnose_Diabetes():
     try:
         diabetes_model = pickle.load(open('./Ml Models/diabetes.pkl', 'rb'))
         data = request.get_json()
-        int_features = [value for value in data.values()]
+        # Extract features in correct order
+        int_features = [
+            float(data['Pregnancies']),
+            float(data['Glucose']),
+            float(data['BloodPressure']),
+            float(data['SkinThickness']),
+            float(data['Insulin']),
+            float(data['BMI']),
+            float(data['DiabetesPedigreeFunction']),
+            float(data['Age'])
+        ]
         final = [np.array(int_features)]
         prediction = diabetes_model.predict_proba(final)
         output = '{0:.{1}f}'.format(prediction[0][1], 2)
@@ -54,7 +64,20 @@ def diagnose_Thyroid():
     try:
         thyroid_model=pickle.load(open('./Ml Models/thyroid_model.pkl', 'rb'))
         data = request.get_json()
-        int_features = [value for value in data.values()]
+        # Extract features in correct order
+        int_features = [
+            float(data['age']),
+            float(data['on_thyroxine']),
+            float(data['query_on_thyroxine']),
+            float(data['on_antithyroid_medication']),
+            float(data['pregnant']),
+            float(data['thyroid_surgery']),
+            float(data['tumor']),
+            float(data['T3']),
+            float(data['TT4']),
+            float(data['T4U']),
+            float(data['FTI'])
+        ]
         final = [np.array(int_features)]
         prediction = thyroid_model.predict_proba(final)
         output = '{0:.{1}f}'.format(prediction[0][1], 2)
@@ -68,10 +91,28 @@ def diagnose_Breast_Cancer():
     try:
         Breast_Cancer_model = pickle.load(open('./Ml Models/Breast_Cancer_Model.pkl', 'rb'))
         data = request.get_json()
-        int_features = [value for value in data.values()]
+        # Extract features in correct order
+        int_features = [
+            float(data['radius_mean']),
+            float(data['texture_mean']),
+            float(data['perimeter_mean']),
+            float(data['area_mean']),
+            float(data['smoothness_mean']),
+            float(data['compactness_mean']),
+            float(data['concavity_mean']),
+            float(data['concave_points_mean']),
+            float(data['radius_worst']),
+            float(data['texture_worst']),
+            float(data['perimeter_worst']),
+            float(data['area_worst']),
+            float(data['smoothness_worst']),
+            float(data['compactness_worst']),
+            float(data['concavity_worst']),
+            float(data['concave_points_worst'])
+        ]
         final = [np.array(int_features)]
-        prediction = Breast_Cancer_model.predict(final)
-        output = '{0:.{1}f}'.format(prediction[0], 2)
+        prediction = Breast_Cancer_model.predict_proba(final)
+        output = '{0:.{1}f}'.format(prediction[0][1], 2)
         return jsonify({'status': 'success', 'probability': float(output)})
     except Exception as e:
         return jsonify({'error': str(e)})       
@@ -83,13 +124,7 @@ def diagnose_Pneumonia():
         if 'image' not in request.files:
             return jsonify({'error': 'No file part'})
         
-        # Load Keras model (.h5 format - converted from old .pkl)
-        try:
-            pneumonia_model = tf.keras.models.load_model('./Ml Models/pneumonia_model.h5', compile=False)
-        except Exception as load_error:
-            print(f"Model load failed: {load_error}")
-            return jsonify({'error': f'Failed to load model: {str(load_error)}'})
-            
+        pneumonia_model = tf.keras.models.load_model('./Ml Models/pneumonia_model.h5', compile=False)
         image = request.files['image'].read()
         nparr = np.frombuffer(image, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -97,12 +132,8 @@ def diagnose_Pneumonia():
         image = np.expand_dims(image, axis=0)
         prediction = pneumonia_model.predict(image)
         output = '{0:.{1}f}'.format(prediction[0][1], 2)
-        # print(output)
         return jsonify({'status':'success','probability': output})
     except Exception as e:
-        print(f"Error in Pneumonia diagnosis: {str(e)}")
-        import traceback
-        traceback.print_exc()
         return jsonify({'error': str(e)})
     
 

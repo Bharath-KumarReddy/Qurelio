@@ -340,3 +340,117 @@ const testCases = [
   }
 ];
 
+
+## 🧪 Testing Guide
+
+### Test Diabetes (Low Risk):
+```json
+{
+  "Pregnancies": 1,
+  "Glucose": 85,
+  "BloodPressure": 65,
+  "SkinThickness": 20,
+  "Insulin": 50,
+  "BMI": 22,
+  "DiabetesPedigreeFunction": 0.3,
+  "Age": 25
+}
+Expected: 5-15% probability
+```
+
+### Test Diabetes (High Risk):
+```json
+{
+  "Pregnancies": 6,
+  "Glucose": 180,
+  "BloodPressure": 95,
+  "SkinThickness": 35,
+  "Insulin": 250,
+  "BMI": 38,
+  "DiabetesPedigreeFunction": 1.8,
+  "Age": 60
+}
+Expected: 85-95% probability
+```
+
+### Test Thyroid (Low Risk):
+```json
+{
+  "age": 30,
+  "on_thyroxine": 0,
+  "query_on_thyroxine": 0,
+  "on_antithyroid_medication": 0,
+  "pregnant": 0,
+  "thyroid_surgery": 0,
+  "tumor": 0,
+  "T3": 1.2,
+  "TT4": 95,
+  "T4U": 0.9,
+  "FTI": 105
+}
+Expected: 0-10% probability
+```
+
+### Test Thyroid (High Risk):
+```json
+{
+  "age": 55,
+  "on_thyroxine": 1,
+  "query_on_thyroxine": 1,
+  "on_antithyroid_medication": 1,
+  "pregnant": 0,
+  "thyroid_surgery": 1,
+  "tumor": 0,
+  "T3": 3.0,
+  "TT4": 170,
+  "T4U": 1.7,
+  "FTI": 180
+}
+Expected: 75-90% probability
+```
+
+### Test Breast Cancer (Benign):
+```json
+{
+  "radius_mean": 11,
+  "texture_mean": 16,
+  "perimeter_mean": 70,
+  "area_mean": 380,
+  "smoothness_mean": 0.08,
+  "compactness_mean": 0.06,
+  "concavity_mean": 0.02,
+  "concave_points_mean": 0.01,
+  "radius_worst": 12,
+  "texture_worst": 19,
+  "perimeter_worst": 75,
+  "area_worst": 420,
+  "smoothness_worst": 0.10,
+  "compactness_worst": 0.08,
+  "concavity_worst": 0.03,
+  "concave_points_worst": 0.02
+}
+Expected: 0-10% probability
+```
+
+### Test Breast Cancer (Malignant):
+```json
+{
+  "radius_mean": 22,
+  "texture_mean": 28,
+  "perimeter_mean": 150,
+  "area_mean": 1800,
+  "smoothness_mean": 0.12,
+  "compactness_mean": 0.28,
+  "concavity_mean": 0.40,
+  "concave_points_mean": 0.18,
+  "radius_worst": 25,
+  "texture_worst": 35,
+  "perimeter_worst": 170,
+  "area_worst": 2200,
+  "smoothness_worst": 0.15,
+  "compactness_worst": 0.50,
+  "concavity_worst": 0.70,
+  "concave_points_worst": 0.25
+}
+Expected: 65-80% probability
+
