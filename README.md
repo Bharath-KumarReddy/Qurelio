@@ -1,6 +1,6 @@
 
 # SetUp
- `git clone https://github.com/Bharath-KumarReddy/Qurelio`
+ `git clone https://github.com/Bharath-KumarReddy/Qurelio.git`
 ## Frontend 
  `cd Client ` <br>
  `npm install` <br>
