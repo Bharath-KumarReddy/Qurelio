@@ -14,4 +14,4 @@ const TypeWriter = (props) => {
       /> );
 }
  
-export default TypeWriter;
+export default TypeWriter
