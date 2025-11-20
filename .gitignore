@@ -12,7 +12,7 @@ __pycache__/
 dist/
 build/
 
-Server/service-account-key.json
+Server\service-account-key.json
 
 
 # IDE
